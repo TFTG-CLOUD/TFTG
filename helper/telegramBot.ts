@@ -72,6 +72,7 @@ export async function setupBot() {
     }
     const videoDuration = msg.video.duration;
     const videoId = msg.video.file_id;
+    const caption = msg.caption
 
     if (videoDuration > setting!.maxVideoDuration) {
       bot.sendMessage(chatId, `Error: Video duration is too long. Please upload a video with a duration of less than ${setting!.maxVideoDuration} seconds.`, {
@@ -127,7 +128,7 @@ export async function setupBot() {
 
         const videoObj = {
           status: 'waiting',
-          title: videoId,
+          title: caption || videoId,
           originalPath: localFilePath,
           originalSize: msg.video?.file_size,
         };
