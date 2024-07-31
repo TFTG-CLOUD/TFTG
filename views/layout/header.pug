@@ -1,0 +1,87 @@
+header.navbar.navbar-expand-md.sticky-top.d-print-none
+  .container-xl
+    button.navbar-toggler(type='button' data-bs-toggle='collapse' data-bs-target='#navbar-menu' aria-controls='navbar-menu' aria-expanded='false' aria-label='Toggle navigation')
+      span.navbar-toggler-icon
+    h1.navbar-brand.navbar-brand-autodark.d-none-navbar-horizontal.pe-0.pe-md-3
+      a(href='.')
+        img.navbar-brand-image(src='/static/logo.svg' width='110' height='32' alt='Tabler')
+    .navbar-nav.flex-row.order-md-last
+      .nav-item.d-none.d-md-flex.me-3
+        .btn-list
+          a.btn(href='https://github.com/tabler/tabler' target='_blank' rel='noreferrer')
+            // Download SVG icon from http://tabler-icons.io/i/brand-github
+            <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-brand-telegram"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M15 10l-4 4l6 6l4 -16l-18 7l4 2l2 6l3 -4" /></svg>
+            |                     Join TG group
+      .d-none.d-md-flex
+        a.nav-link.px-0.hide-theme-dark.me-3(href='?theme=dark' title='Enable dark mode' data-bs-toggle='tooltip' data-bs-placement='bottom')
+          // Download SVG icon from http://tabler-icons.io/i/moon
+          svg.icon(xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewbox='0 0 24 24' stroke-width='2' stroke='currentColor' fill='none' stroke-linecap='round' stroke-linejoin='round')
+            path(stroke='none' d='M0 0h24v24H0z' fill='none')
+            path(d='M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z')
+        a.nav-link.px-0.hide-theme-light.me-3(href='?theme=light' title='Enable light mode' data-bs-toggle='tooltip' data-bs-placement='bottom')
+          // Download SVG icon from http://tabler-icons.io/i/sun
+          svg.icon(xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewbox='0 0 24 24' stroke-width='2' stroke='currentColor' fill='none' stroke-linecap='round' stroke-linejoin='round')
+            path(stroke='none' d='M0 0h24v24H0z' fill='none')
+            path(d='M12 12m-4 0a4 4 0 1 0 8 0a4 4 0 1 0 -8 0')
+            path(d='M3 12h1m8 -9v1m8 8h1m-9 8v1m-6.4 -15.4l.7 .7m12.1 -.7l-.7 .7m0 11.4l.7 .7m-12.1 -.7l-.7 .7')
+      .nav-item.dropdown
+        a.nav-link.d-flex.lh-1.text-reset.p-0(href='#' data-bs-toggle='dropdown' aria-label='Open user menu')
+          span.avatar.avatar-sm(style='background-image: url(/static/avatars/000m.jpg)')
+          .d-none.d-xl-block.ps-2
+            div admin
+            .mt-1.small.text-secondary admin
+        .dropdown-menu.dropdown-menu-end.dropdown-menu-arrow
+          a.dropdown-item(href='/logout') Logout
+header.navbar-expand-md
+  #navbar-menu.collapse.navbar-collapse
+    .navbar
+      .container-xl
+        ul.navbar-nav
+          li.nav-item(class=currentPath === '/admin' ? 'active' : '')
+            a.nav-link(href='/admin')
+              span.nav-link-icon.d-md-none.d-lg-inline-block
+                // Download SVG icon from http://tabler-icons.io/i/home
+                svg.icon(xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewbox='0 0 24 24' stroke-width='2' stroke='currentColor' fill='none' stroke-linecap='round' stroke-linejoin='round')
+                  path(stroke='none' d='M0 0h24v24H0z' fill='none')
+                  path(d='M5 12l-2 0l9 -9l9 9l-2 0')
+                  path(d='M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-7')
+                  path(d='M9 21v-6a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v6')
+              span.nav-link-title
+                | Home
+          li.nav-item(class=currentPath === '/admin/upload' ? 'active' : '')
+            a.nav-link(href='/admin/upload')
+              span.nav-link-icon.d-md-none.d-lg-inline-block
+                // Download SVG icon from http://tabler-icons.io/i/home
+                <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-upload"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2 -2v-2" /><path d="M7 9l5 -5l5 5" /><path d="M12 4l0 12" /></svg>
+              span.nav-link-title
+                | Upload
+          li.nav-item(class=currentPath === '/admin/setting' ? 'active' : '')
+            a.nav-link(href='/admin/setting')
+              span.nav-link-icon.d-md-none.d-lg-inline-block
+                // Download SVG icon from http://tabler-icons.io/i/home
+                svg.icon(xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewbox='0 0 24 24' stroke-width='2' stroke='currentColor' fill='none' stroke-linecap='round' stroke-linejoin='round')
+                  path(stroke='none' d='M0 0h24v24H0z' fill='none')
+                  path(d='M12 3l8 4.5l0 9l-8 4.5l-8 -4.5l0 -9l8 -4.5')
+                  path(d='M12 12l8 -4.5')
+                  path(d='M12 12l0 9')
+                  path(d='M12 12l-8 -4.5')
+                  path(d='M16 5.25l-8 4.5')
+              span.nav-link-title
+                | Setting
+          li.nav-item(class=currentPath === '/admin/telegram' ? 'active' : '')
+            a.nav-link(href='/admin/telegram')
+              span.nav-link-icon.d-md-none.d-lg-inline-block
+                // Download SVG icon from http://tabler-icons.io/i/home
+                <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-brand-telegram"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M15 10l-4 4l6 6l4 -16l-18 7l4 2l2 6l3 -4" /></svg>
+              span.nav-link-title
+                | Telegram bot
+        .my-2.my-md-0.flex-grow-1.flex-md-grow-0.order-first.order-md-last
+          form(action='/' method='get' autocomplete='off' novalidate='')
+            .input-icon
+              span.input-icon-addon
+                // Download SVG icon from http://tabler-icons.io/i/search
+                svg.icon(xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewbox='0 0 24 24' stroke-width='2' stroke='currentColor' fill='none' stroke-linecap='round' stroke-linejoin='round')
+                  path(stroke='none' d='M0 0h24v24H0z' fill='none')
+                  path(d='M10 10m-7 0a7 7 0 1 0 14 0a7 7 0 1 0 -14 0')
+                  path(d='M21 21l-6 -6')
+              input.form-control(type='text' value='' placeholder='Search…' aria-label='Search in website')

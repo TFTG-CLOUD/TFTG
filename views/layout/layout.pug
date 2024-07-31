@@ -1,0 +1,116 @@
+doctype html
+head
+  meta(charset='utf-8')
+  meta(name='viewport' content='width=device-width, initial-scale=1, viewport-fit=cover')
+  meta(http-equiv='X-UA-Compatible' content='ie=edge')
+  title= title || 'Dashboard - TFTG'
+  block head
+    // CSS files
+    link(href='/dist/css/tabler.min.css?1692870487' rel='stylesheet')
+    link(href='/dist/css/tabler-flags.min.css?1692870487' rel='stylesheet')
+    link(href='/dist/css/tabler-payments.min.css?1692870487' rel='stylesheet')
+    link(href='/dist/css/tabler-vendors.min.css?1692870487' rel='stylesheet')
+    link(href='/dist/css/demo.min.css?1692870487' rel='stylesheet')
+  style.
+    @import url('https://rsms.me/inter/inter.css');
+    :root {
+    --tblr-font-sans-serif: 'Inter Var', -apple-system, BlinkMacSystemFont, San Francisco, Segoe UI, Roboto, Helvetica Neue, sans-serif;
+    }
+    body {
+    font-feature-settings: "cv03", "cv04", "cv11";
+    }
+    :root,[data-bs-theme=light] {
+      --bs-table-bg: #fff
+    }
+    [data-bs-theme=dark],body[data-bs-theme=dark] [data-bs-theme=light] {
+      --bs-table-bg: #0d1b2a
+    }
+body
+  script(src='/dist/js/demo-theme.min.js?1692870487')
+  .page
+    // Navbar
+    .sticky-top
+      include ./header
+    .page-wrapper
+      block content
+      include ./footer
+  #modal-report.modal.modal-blur.fade(tabindex='-1' role='dialog' aria-hidden='true')
+    .modal-dialog.modal-lg(role='document')
+      .modal-content
+        .modal-header
+          h5.modal-title New report
+          button.btn-close(type='button' data-bs-dismiss='modal' aria-label='Close')
+        .modal-body
+          .mb-3
+            label.form-label Name
+            input.form-control(type='text' name='example-text-input' placeholder='Your report name')
+          label.form-label Report type
+          .form-selectgroup-boxes.row.mb-3
+            .col-lg-6
+              label.form-selectgroup-item
+                input.form-selectgroup-input(type='radio' name='report-type' value='1' checked='')
+                span.form-selectgroup-label.d-flex.align-items-center.p-3
+                  span.me-3
+                    span.form-selectgroup-check
+                  span.form-selectgroup-label-content
+                    span.form-selectgroup-title.strong.mb-1 Simple
+                    span.d-block.text-secondary Provide only basic data needed for the report
+            .col-lg-6
+              label.form-selectgroup-item
+                input.form-selectgroup-input(type='radio' name='report-type' value='1')
+                span.form-selectgroup-label.d-flex.align-items-center.p-3
+                  span.me-3
+                    span.form-selectgroup-check
+                  span.form-selectgroup-label-content
+                    span.form-selectgroup-title.strong.mb-1 Advanced
+                    span.d-block.text-secondary Insert charts and additional advanced analyses to be inserted in the report
+          .row
+            .col-lg-8
+              .mb-3
+                label.form-label Report url
+                .input-group.input-group-flat
+                  span.input-group-text
+                    | https://tabler.io/reports/
+                  input.form-control.ps-0(type='text' value='report-01' autocomplete='off')
+            .col-lg-4
+              .mb-3
+                label.form-label Visibility
+                select.form-select
+                  option(value='1' selected='') Private
+                  option(value='2') Public
+                  option(value='3') Hidden
+        .modal-body
+          .row
+            .col-lg-6
+              .mb-3
+                label.form-label Client name
+                input.form-control(type='text')
+            .col-lg-6
+              .mb-3
+                label.form-label Reporting period
+                input.form-control(type='date')
+            .col-lg-12
+              div
+                label.form-label Additional information
+                textarea.form-control(rows='3')
+        .modal-footer
+          a.btn.btn-link.link-secondary(href='#' data-bs-dismiss='modal')
+            | Cancel
+          a.btn.btn-primary.ms-auto(href='#' data-bs-dismiss='modal')
+            // Download SVG icon from http://tabler-icons.io/i/plus
+            svg.icon(xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewbox='0 0 24 24' stroke-width='2' stroke='currentColor' fill='none' stroke-linecap='round' stroke-linejoin='round')
+              path(stroke='none' d='M0 0h24v24H0z' fill='none')
+              path(d='M12 5l0 14')
+              path(d='M5 12l14 0')
+            |               Create new report
+  block js
+    // Libs JS
+    script(src='/dist/libs/apexcharts/dist/apexcharts.min.js?1692870487' defer='')
+    script(src='/dist/libs/jsvectormap/dist/js/jsvectormap.min.js?1692870487' defer='')
+    script(src='/dist/libs/jsvectormap/dist/maps/world.js?1692870487' defer='')
+    script(src='/dist/libs/jsvectormap/dist/maps/world-merc.js?1692870487' defer='')
+    // Tabler Core
+    script(src='/dist/js/tabler.min.js?1692870487' defer='')
+    script(src='/dist/js/demo.min.js?1692870487' defer='')
+    script(src='https://code.jquery.com/jquery-3.7.1.min.js' integrity='sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=' crossorigin='anonymous')
+    script(src='https://cdnjs.cloudflare.com/ajax/libs/bootbox.js/6.0.0/bootbox.min.js')

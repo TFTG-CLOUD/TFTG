@@ -1,0 +1,94 @@
+extends layout/layout
+
+block content
+  .page-body
+    .container-xl
+      .row.row-deck.row-cards
+        .col-12
+          form.card(action='' method='post')
+            .card-header
+              h4.card-title Video Transcoding Settings
+            .card-body
+              if message
+                p.text-danger #{message}
+              p Note that all fields are required, otherwise the transcoding will go wrong.
+              .row.g-5
+                .col-xl-6
+                  .mb-3
+                    label.form-label Resolution
+                    select.form-select(name='resolution')
+                      each val in ['480p', '720p', '1080p', '4K']
+                        option(value=val, selected=setting && setting.resolution === val)= val
+
+                  .mb-3
+                    label.form-label Bitrate (Kbps)
+                    input.form-control(type='number' name='bitrate' min='0' value=setting && setting.bitrate)
+
+                  .mb-3
+                    label.form-label Frame Rate
+                    .btn-group(role='group')
+                      each val in [25, 30, 60]
+                        input.btn-check(type='radio' name='frameRate' id=`fr${val}` value=val checked=setting && setting.frameRate === val)
+                        label.btn.btn-outline-primary(for=`fr${val}`)= val
+
+                  .mb-3
+                    .form-check.form-switch
+                      input.form-check-input(type='checkbox' name='generatePreviewVideo' checked=setting && setting.generatePreviewVideo)
+                      label.form-check-label Generate Preview Video
+
+                  .mb-3
+                    .form-check.form-switch
+                      input.form-check-input(type='checkbox' name='generateThumbnailMosaic' checked=setting && setting.generateThumbnailMosaic)
+                      label.form-check-label Generate Thumbnail Mosaic
+
+                .col-xl-6
+                  .mb-3
+                    label.form-label Watermark Image
+                    .input-group
+                      input.form-control#watermark(type='text' name='watermarkImage' placeholder='Recommended size is 170*60' value=setting && setting.watermarkImage)
+                      button.btn.btn-outline-secondary.upload(type='button') Upload
+
+                  .mb-3
+                    label.form-label Watermark Position
+                    select.form-select(name='watermarkPosition')
+                      each val, key in {'topLeft': 'Top Left', 'topRight': 'Top Right', 'bottomLeft': 'Bottom Left', 'bottomRight': 'Bottom Right'}
+                        option(value=key selected=setting && setting.watermarkPosition === key)= val
+
+                  .mb-3
+                    label.form-label Screenshot Count
+                    input.form-control(type='number' name='screenshotCount' min='0' value=setting && setting.screenshotCount)
+                    small It is recommended to set the number of screenshots to 12 or more, because at least 12 are needed to generate thumbnails.
+                  .mb-3
+                    label.form-label Preview Video Size
+                    .row
+                      .col-6
+                        input.form-control(type='number' name='previewVideoWidth' placeholder='Width' min='0' value=setting && setting.previewVideoSize && setting.previewVideoSize.width)
+                      .col-6
+                        input.form-control(type='number' name='previewVideoHeight' placeholder='Height' min='0' value=setting && setting.previewVideoSize && setting.previewVideoSize.height)
+                    small The width and height can be set to 0. If set to 0, it will be adaptive.
+                  .mb-3
+                    label.form-label Poster Size
+                    .row
+                      .col-6
+                        input.form-control(type='number' name='posterWidth' placeholder='Width' min='0' value=setting && setting.posterSize && setting.posterSize.width)
+                      .col-6
+                        input.form-control(type='number' name='posterHeight' placeholder='Height' min='0' value=setting && setting.posterSize && setting.posterSize.height)
+                    small The width and height can be set to 0. If set to 0, it will be adaptive.
+              .mt-4
+                button.btn.btn-primary(type='submit') Save Settings
+append js
+  <link href="/dist/libs/dropzone/dist/dropzone.css?1720208459" rel="stylesheet"/>
+  <script src="/dist/libs/dropzone/dist/dropzone-min.js?1720208459"></script>
+  script.
+    var mydropzone = $(".upload").dropzone({ 
+      url: "/upload",
+      paramName: 'file',
+      success: function(file,res) {
+        if (res.success == 1) {
+          $('#watermark').val(res.filePath);
+        }
+      },
+      addedfile: function(file) {
+        console.log(file);
+      }
+    });

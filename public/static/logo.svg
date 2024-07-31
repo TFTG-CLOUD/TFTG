@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 68">
+  <!-- 新的视频图标 -->
+  <g transform="translate(10, 10) scale(0.9)">
+    <rect x="0" y="0" width="60" height="48" rx="8" ry="8" fill="#0054a6"/>
+    <polygon points="22,14 22,34 42,24" fill="white"/>
+    <rect x="50" y="8" width="8" height="32" rx="4" ry="4" fill="#0054a6"/>
+  </g>
+  
+  <!-- TFTG 文字 -->
+  <text x="80" y="45" font-family="Arial, sans-serif" font-size="40" font-weight="bold" fill="#4a4a4a">TFTG</text>
+</svg>

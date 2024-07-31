@@ -1,0 +1,77 @@
+extends layout/layout
+block content
+  .page-header.d-print-none
+    .container-xl
+      .row.g-2.align-items-center
+        .col
+          // Page pre-title
+          .page-pretitle.title
+            | Upload
+  // Page body
+  .page-body
+    .container-xl
+      .row.row-deck.row-cards
+        .input-wrapper
+          input.my-single-file.tm-border.rounded(type='file', multiple)
+append js
+  <link rel="stylesheet" href="/dist/css/filepond.min.css">
+  <script src="https://unpkg.com/filepond/dist/filepond.min.js"></script>
+  <script src="https://unpkg.com/jquery-filepond/filepond.jquery.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/tus-js-client@latest/dist/tus.min.js"></script>
+  script.
+    $(function(){
+    $('.my-single-file').filepond({
+      server: {
+        process: (fieldName, file, metadata, load, error, progress, abort) => {
+          var upload = new tus.Upload(file, {
+            endpoint: "#{uploadUrl}",
+            retryDelays: [0, 1000, 3000, 5000],
+            metadata: {
+              filename: file.name,
+              filetype: file.type
+            },
+            headers: {
+              "Authorization": "#{token}"
+            },
+            onError: function(err) {
+              console.log("Failed because: " + err)
+              error(err)
+            },
+            onProgress: function(bytesUploaded, bytesTotal) {
+              progress(true, bytesUploaded, bytesTotal);
+            },
+            onSuccess: function() {
+              console.log('Download %s from %s', upload.file.name, upload.url)
+              console.log(upload.file.name);
+              var id = upload.url.split('/').pop();
+              $.ajax({
+                type: 'POST',
+                dataType: 'JSON',
+                url: `/createJob`,
+                data: {id: id, name: upload.file.name, size: file.size},
+                success: function(response) {
+                  console.log('创建任务成功！');
+                }
+              });
+              load(id);
+            }
+              })
+              upload.findPreviousUploads().then((previousUploads) => {
+                for(var i=0; i<previousUploads.length; i++) {
+                  upload.resumeFromPreviousUpload(previousUploads[i]);
+                }
+                upload.start();
+              });
+              return {
+                abort: () => {
+                  upload.abort()
+                  abort()
+                }
+              }
+                }
+                },
+                maxParallelUploads: 4,
+                allowMultiple: true,
+                labelIdle: 'Please drag and drop your video files here, or <span class="filepond--label-action">click to upload files</span>'
+                });
+              });

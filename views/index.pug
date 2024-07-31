@@ -1,0 +1,398 @@
+extends layout/layout
+append head
+  <link href="https://cdn.datatables.net/v/bs5/dt-2.1.2/b-3.1.0/b-html5-3.1.0/b-print-3.1.0/fc-5.0.1/sl-2.0.3/datatables.min.css" rel="stylesheet">
+block content
+  .page-header.d-print-none
+    .container-xl
+      .row.g-2.align-items-center
+        .col
+          // Page pre-title
+          .page-pretitle
+            | Overview
+          h2.page-title
+            | Dashboard
+        // Page title actions
+        .col-auto.ms-auto.d-print-none
+          .btn-list
+            span.d-none.d-sm-inline
+              a.btn(href='/admin/upload')
+                | Upload new video
+            a.btn.btn-primary.d-sm-none.btn-icon(href='#' data-bs-toggle='modal' data-bs-target='#modal-report' aria-label='Create new report')
+              // Download SVG icon from http://tabler-icons.io/i/plus
+              svg.icon(xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewbox='0 0 24 24' stroke-width='2' stroke='currentColor' fill='none' stroke-linecap='round' stroke-linejoin='round')
+                path(stroke='none' d='M0 0h24v24H0z' fill='none')
+                path(d='M12 5l0 14')
+                path(d='M5 12l14 0')
+  // Page body
+  .page-body
+    .container-xl
+      .row.row-deck.row-cards
+        .col-sm-6.col-lg-3
+          .card
+            .card-body
+              .d-flex.align-items-center
+                .subheader Videos
+              .h1.mb-3.number.count-videos #{100000}
+        .col-sm-6.col-lg-3
+          .card
+            .card-body
+              .d-flex.align-items-center
+                .subheader Today Videos
+              .d-flex.align-items-baseline
+                .h1.mb-0.me-2.number.count-today-videos 100
+                .me-auto
+                  span.d-inline-flex.align-items-center.lh-1.count-today-videos-percent
+                    | 8%
+                    // Download SVG icon from http://tabler-icons.io/i/trending-up
+                    <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-trending-down"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M3 7l6 6l4 -4l8 8" /><path d="M21 10l0 7l-7 0" /></svg>
+        .col-sm-6.col-lg-3
+          .card
+            .card-body
+              .d-flex.align-items-center
+                .subheader Users
+              .d-flex.align-items-baseline
+                .h1.mb-3.me-2.number.count-users 6782
+        .col-sm-6.col-lg-3
+          .card
+            .card-body
+              .d-flex.align-items-center
+                .subheader Today Users
+              .d-flex.align-items-baseline
+                .h1.mb-3.me-2.number.count-today-users 2986
+                .me-auto
+                  span.d-inline-flex.align-items-center.lh-1.count-today-users-percent
+                    | 4%
+                    // Download SVG icon from http://tabler-icons.io/i/trending-up
+                    svg.icon.ms-1(xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewbox='0 0 24 24' stroke-width='2' stroke='currentColor' fill='none' stroke-linecap='round' stroke-linejoin='round')
+                      path(stroke='none' d='M0 0h24v24H0z' fill='none')
+                      path(d='M3 17l6 -6l4 4l8 -8')
+                      path(d='M14 7l7 0l0 7')
+        .col-12
+          .card
+            .card-header
+              h3.card-title Videos
+            .table-responsive
+              table.table.card-table.table-vcenter.text-nowrap.datatable#tftg-table
+                thead
+                  tr
+                    th Title
+                    th Status
+                    th OriginalSize
+                    th AfterSize
+                    th Duration
+                    th Poster
+                    th Actions
+append js
+  <script src="/dist/libs/fslightbox/index.js?1692870487"></script>
+  <script src="https://cdn.datatables.net/v/bs5/dt-2.1.2/b-3.1.0/b-html5-3.1.0/b-print-3.1.0/fc-5.0.1/sl-2.0.3/datatables.min.js"></script>
+  script.
+    const numberElements = document.querySelectorAll('.number');
+    $.ajax({
+      url: '/admin/stats',
+      type: 'GET',
+      dataType: 'json',
+      success: function(data) {
+        if(data.success) {
+          // Update the number of videos
+          document.querySelector('.count-videos').textContent = data.countVideos;
+
+          // Update the number of today's videos and calculate the percentage
+          document.querySelector('.count-today-videos').textContent = data.countVideosToday;
+          const videoPercentage = (data.countVideosYesterday === 0 && data.countVideosToday === 0) ? 0 : (data.countVideosYesterday === 0 ? 100 : ((data.countVideosToday - data.countVideosYesterday) / data.countVideosYesterday) * 100);
+          const videoPercentageElement = document.querySelector('.count-today-videos-percent');
+          videoPercentageElement.textContent = `${videoPercentage.toFixed(0)}%`;
+          if (videoPercentage >= 0) {
+            videoPercentageElement.classList.add('text-green');
+            videoPercentageElement.innerHTML += `
+              <svg class="icon ms-1" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                <path d="M3 17l6 -6l4 4l8 -8"/>
+                <path d="M14 7l7 0l0 7"/>
+              </svg>`;
+          } else {
+            videoPercentageElement.classList.add('text-red');
+            videoPercentageElement.innerHTML += `
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-trending-down">
+                <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                <path d="M3 7l6 6l4 -4l8 8" />
+                <path d="M21 10l0 7l-7 0" />
+              </svg>`;
+          }
+
+          // Update the number of users
+          document.querySelector('.count-users').textContent = data.countUsers;
+
+          // Update the number of today's users and calculate the percentage
+          document.querySelector('.count-today-users').textContent = data.countUsersToday;
+          const userPercentage = (data.countUsersYesterday === 0 && data.countUsersToday === 0) ? 0 : (data.countUsersYesterday === 0 ? 100 : ((data.countUsersToday - data.countUsersYesterday) / data.countUsersYesterday) * 100);
+          const userPercentageElement = document.querySelector('.count-today-users-percent');
+          userPercentageElement.textContent = `${userPercentage.toFixed(0)}%`;
+          if (userPercentage >= 0) {
+            userPercentageElement.classList.add('text-green');
+            userPercentageElement.innerHTML += `
+              <svg class="icon ms-1" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                <path d="M3 17l6 -6l4 4l8 -8"/>
+                <path d="M14 7l7 0l0 7"/>
+              </svg>`;
+          } else {
+            userPercentageElement.classList.add('text-red');
+            userPercentageElement.innerHTML += `
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-trending-down">
+                <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                <path d="M3 7l6 6l4 -4l8 8" />
+                <path d="M21 10l0 7l-7 0" />
+              </svg>`;
+          }
+        }
+      }
+    });
+    // 遍历每个元素,获取文本并调用 toLocaleString()
+    numberElements.forEach(element => {
+      const originalNumber = parseFloat(element.textContent);
+      const formattedNumber = originalNumber.toLocaleString();
+      element.textContent = formattedNumber;
+    });
+    let table = new DataTable('#tftg-table', {
+      select: true,
+      ajax: "/videos",
+      serverSide: true,
+      fixedColumns: {
+        start: 0,
+        end: 1
+      },
+      "processing": true,
+      scrollCollapse: true,
+      scrollX: true,
+      layout: {
+        topStart: {
+          buttons: [
+            'copy', 'csv','selectAll', 'selectNone'
+          ]
+        }
+      },
+      drawCallback: function(settings) {
+        // This function is called after the table has been redrawn
+        // You can use this to perform any actions you need to take after the data has been loaded
+        console.log('Data loading complete!');
+        refreshFsLightbox();
+      },
+      columns: [
+        {
+          data: 'title',
+          orderable: false
+        },
+        {
+          data: 'status',
+        },
+        {
+          data: 'originalSize',
+          orderable: false,
+          render: function (data, type) {
+
+            if(data) {
+              return formatBytes(data);
+            }
+            return 'Waiting';
+          }
+        },
+        {
+          data: 'afterSize',
+          orderable: false,
+          render: function (data, type) {
+
+            if(data) {
+              return formatBytes(data);
+            }
+            return 'Waiting';
+          }
+        },
+        {
+          data: 'duration',
+          render: function (data, type) {
+
+            if(data) {
+              return formatDuration(data);
+            }
+            return 'Waiting';
+          }
+        },
+        {
+          data: 'poster',
+          orderable: false,
+          render: function (data, type) {
+
+            if(data) {
+              return `<a data-fslightbox="gallery" href="${data.replace('public', '')}">
+                <!-- Photo -->
+                <div width=100 class="img-responsive img-responsive-4x3 rounded border" style="background-image: url(${data.replace('public', '')})"></div>
+                </a>`;
+            }
+            return 'Waiting';
+          }
+        },
+        {
+          "data": null,
+          orderable: false,
+          "defaultContent": `
+            <div class="btn-group btn-group-sm" role="group" aria-label="Actions">
+              <button type="button" class="btn btn-primary btn-view">View</button>
+              <button type="button" class="btn btn-primary btn-edit">Edit</button>
+              <button type="button" class="btn btn-danger btn-delete">Delete</button>
+            </div>`
+              }
+      ]
+    });
+
+    // Add event listener for the Edit button
+    $('#tftg-table tbody').on('click', '.btn-edit', function () {
+      let data = table.row($(this).closest('tr')).data();
+      let currentTitle = data.title;
+      let videoId = data._id; // Assuming the video ID is available in the data object
+
+      bootbox.prompt({
+        title: "Edit Title",
+        value: currentTitle,
+        callback: function (result) {
+          if (result !== null) {
+            // Send PATCH request to update the title
+            $.ajax({
+              url: `/videos`,
+              type: 'PATCH',
+              data: { title: result, id: videoId },
+              success: function (response) {
+                // Refresh the table or update the specific row
+                table.ajax.reload(null, false); // Reload the table without resetting the pagination
+              },
+              error: function (xhr, status, error) { console.error("Error updating title:", error); 
+              } 
+            }); 
+          } 
+        } 
+      }); 
+    });
+
+    $('#tftg-table tbody').on('click', '.btn-view', function() {
+      let data = table.row($(this).parents('tr')).data();
+      let videoId = data._id;
+
+      $.ajax({
+        url: `/videos/${videoId}`,
+        method: 'GET',
+        success: function(res) {
+          const videoData = res.data;
+          let dialogContent = `
+            <div>
+              <h5>Video Information</h5>
+              <video width="320" height="240" controls>
+                <source src="${videoData.afterPath.replace('public','')}" type="video/mp4">
+                Your browser does not support the video tag.
+              </video>
+              <input class="form-control" value="${videoData.afterPath.replace('public','')}">
+              <div class="mt-1"><strong>Poster</strong></div>
+              <input class="form-control" value="${videoData.poster.replace('public','')}">
+              <div class="mt-1"><strong>Thumbnail</strong></div>
+              ${videoData.thumbnail && `<input class="form-control" value="${videoData.thumbnail.replace('public','')}">`}
+              <div class="mt-1"><strong>Screenshots</strong></div>
+              ${videoData.screenshots.map(screenshot => `<input class="form-control" value="${screenshot.replace('public','')}">`).join('')}
+              <div class="mt-1"><strong>Preview Video</strong></div>
+              <video width="320" height="240" controls>
+                <source src="${videoData.previewVideo.replace('public','')}" type="video/mp4">
+                Your browser does not support the video tag.
+              </video>
+              <input class="form-control" value="${videoData.previewVideo.replace('public','')}">
+            </div>`;
+
+          bootbox.dialog({
+            title: 'Video Details',
+            message: dialogContent,
+            size: 'large',
+            buttons: {
+              ok: {
+                label: "Close",
+                className: 'btn-primary'
+              }
+            }
+          });
+        },
+        error: function(err) {
+          console.error('Error fetching video details:', err);
+        }
+      });
+    });
+
+    $('#tftg-table').on('click', '.btn-delete', function () {
+      // 获取当前行的数据
+      let row = table.row($(this).parents('tr'));
+      let data = row.data();
+      console.log(data);
+
+      // 获取当前行的 id
+      let videoId = data._id;
+      bootbox.confirm('Are you sure delete video and video files?', function(result)
+        {
+        /* your callback code */
+          if(result) {
+            console.log(videoId);
+            $.ajax({
+              url: `/videos?id=${videoId}`,
+              type: 'DELETE',
+              success: function (result) {
+                // 删除成功后，移除当前行
+                if(result.success) {
+                  row.remove().draw(false);
+                  bootbox.alert('Video deleted successfully');
+                }
+              },
+              error: function (xhr, status, error) {
+                bootbox.alert(`Error deleting video: ${error}`);
+              }
+            });
+        }
+        });
+      //- // 通过 AJAX 调用删除视频
+      //- $.ajax({
+      //-   url: `/admin/videos/${videoId}`,
+      //-   type: 'DELETE',
+      //-   success: function (result) {
+      //-     // 删除成功后，移除当前行
+      //-     row.remove().draw(false);
+      //-     alert('Video deleted successfully');
+      //-   },
+      //-   error: function (xhr, status, error) {
+      //-     alert(`Error deleting video: ${error}`);
+      //-   }
+      //- });
+    });
+    // 阻止事件传播
+    $('#tftg-table tbody').on('click', 'button.dropdown-toggle', function(e) {
+      e.stopPropagation();
+    });
+
+    $('#tftg-table tbody').on('click', 'a.dropdown-item', function () {
+      var data = table.row($(this).parents('tr')).data();
+      console.log(data);
+      alert('You clicked on ' + data.title + '\'s row');
+    });
+    function formatBytes(bytes) {
+      const kilobyte = 1024;
+      const megabyte = kilobyte * 1024;
+      const gigabyte = megabyte * 1024;
+
+      if (bytes >= gigabyte) {
+        return (bytes / gigabyte).toFixed(2) + ' GB';
+      } else if (bytes >= megabyte) {
+        return (bytes / megabyte).toFixed(2) + ' MB';
+      } else if (bytes >= kilobyte) {
+        return (bytes / kilobyte).toFixed(2) + ' KB';
+      } else {
+        return bytes + ' bytes';
+      }
+    }
+    function formatDuration(duration) {
+      const hours = Math.floor(duration / 3600);
+      const minutes = Math.floor((duration % 3600) / 60);
+      const seconds = Math.floor(duration % 60);
+
+      return `${hours}h ${minutes}m ${seconds}s`;
+    }

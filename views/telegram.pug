@@ -1,0 +1,42 @@
+extends layout/layout
+
+block content
+  .page-body
+    .container-xl
+      .row.row-deck.row-cards
+        .col-12
+          form.card(action='' method='post')
+            .card-header
+              h4.card-title Telegram bot Settings
+            .card-body
+              if message
+                p.text-danger #{message}
+              .row.g-5
+                .col-xl-12
+                  .mb-3
+                    label.form-label Bot token
+                    input.form-control(type='text' name='TranscodingBotToken' value=setting && setting.TranscodingBotToken)
+
+                  .mb-3
+                    label.form-label Max Video Duration
+                    input.form-control(type="number" name="maxVideoDuration" value=setting && setting.maxVideoDuration)
+                    small The maximum video duration that the robot can process, in seconds. If the duration exceeds, the robot will prompt that it cannot process it.
+
+              .mt-4
+                button.btn.btn-primary(type='submit') Save Settings
+append js
+  <link href="/dist/libs/dropzone/dist/dropzone.css?1720208459" rel="stylesheet"/>
+  <script src="/dist/libs/dropzone/dist/dropzone-min.js?1720208459"></script>
+  script.
+    var mydropzone = $(".upload").dropzone({ 
+      url: "/upload",
+      paramName: 'file',
+      success: function(file,res) {
+        if (res.success == 1) {
+          $('#watermark').val(res.filePath);
+        }
+      },
+      addedfile: function(file) {
+        console.log(file);
+      }
+    });
