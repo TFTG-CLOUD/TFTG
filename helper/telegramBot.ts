@@ -96,8 +96,15 @@ export async function setupBot() {
     // 处理菜单选项回调
     bot.on('callback_query', async (callbackQuery) => {
       const action = callbackQuery.data;
-
-
+      const message = callbackQuery.message;
+      if (message) {
+        await bot.editMessageReplyMarkup({
+          inline_keyboard: []
+        }, {
+          chat_id: chatId,
+          message_id: message.message_id
+        });
+      }
       if (action === 'download_and_transcode') {
         if (callbackQuery.message) {
           bot.sendMessage(chatId, 'Downloading and transcoding video...', {
