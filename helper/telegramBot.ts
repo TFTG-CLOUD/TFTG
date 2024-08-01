@@ -116,7 +116,7 @@ export async function setupBot() {
           return;
         }
         console.log(filePath);
-        let localFilePath = path.join(__dirname, 'uploads', `${videoId}.mp4`);
+        let localFilePath = path.join('uploads');
 
         const realPath = await bot.downloadFile(videoId, localFilePath);
         console.log(realPath);
