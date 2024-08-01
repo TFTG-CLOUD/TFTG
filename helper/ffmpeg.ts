@@ -79,9 +79,11 @@ async function transcodeVideo(videoPath: string, options: Setting, id: string): 
 
   return new Promise(async (resolve, reject) => {
     const validVideo = await validateVideoFile(videoPath);
-    if (!validVideo) return reject('Invalid video file');
-    const isVertical = await isPortraitVideo(videoPath).catch(err => reject(err));
-    await readMetadataAndSave(videoPath, id).catch(err => reject(err));
+    if (!validVideo) {
+      await Video.updateOne({ _id: id }, { status: 'error', errorMessage: 'Not a valid video!' });
+    };
+    const isVertical = await isPortraitVideo(videoPath).catch(err => console.error(err));
+    await readMetadataAndSave(videoPath, id).catch(err => console.error(err));
     const size = isVertical ? `-2:${outputResolution.width}` : `${outputResolution.width}:-2`;
 
     const date = new Date().toISOString().split('T')[0];
@@ -94,7 +96,7 @@ async function transcodeVideo(videoPath: string, options: Setting, id: string): 
 
     await Video.updateOne({ _id: id }, { transcodedPath: outputDir });
 
-    await screenshots(videoPath, outputDir, options, id).catch(err => reject(err));
+    await screenshots(videoPath, outputDir, options, id).catch(err => console.error(err));
 
     if (generatePreviewVideo) {
       const width = previewVideoSize!.width;
@@ -166,7 +168,7 @@ async function transcodeVideo(videoPath: string, options: Setting, id: string): 
       })
       .on('error', async (err: { message: any; }) => {
         await Video.updateOne({ _id: id }, { status: 'error', errorMessage: err.message });
-        reject(`Transcoding failed: ${err.message}`);
+        console.error(err);
       }).run();
   });
 }
