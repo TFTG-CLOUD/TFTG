@@ -118,8 +118,8 @@ export async function setupBot() {
         console.log(filePath);
         let localFilePath = path.join(__dirname, 'uploads', `${videoId}.mp4`);
 
-        await bot.downloadFile(videoId, localFilePath);
-
+        const realPath = await bot.downloadFile(videoId, localFilePath);
+        console.log(realPath);
         // local api server will exists
         if (fs.existsSync(filePath)) {
           fs.unlinkSync(filePath);

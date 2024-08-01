@@ -170,6 +170,6 @@ app.use((err: any, req: Request, res: Response, next: NextFunction) => {
   });
 });
 
-app.listen(3000, () => {
+app.listen(3333, () => {
   console.log('The magic happens on port 3000!');
 });
