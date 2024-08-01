@@ -123,20 +123,20 @@ export async function setupBot() {
           return;
         }
         console.log(filePath);
-        let localFilePath = path.join('uploads');
+        // let localFilePath = path.join('uploads');
 
-        const realPath = await bot.downloadFile(videoId, localFilePath);
-        console.log(realPath);
+        // const realPath = await bot.downloadFile(videoId, localFilePath);
+        // console.log(realPath);
         // local api server will exists
-        if (fs.existsSync(filePath)) {
-          fs.unlinkSync(filePath);
-        }
+        // if (fs.existsSync(filePath)) {
+        //   fs.unlinkSync(filePath);
+        // }
         // await downloadFile(filePath, localFilePath);
 
         const videoObj = {
           status: 'waiting',
           title: caption || videoId,
-          originalPath: realPath,
+          originalPath: filePath,
           originalSize: msg.video?.file_size,
         };
         const video = await Video.create(videoObj);
