@@ -6,7 +6,7 @@ import redisClient from '../redis';
 import type { UserPayload } from '../type/types';
 import { Setting } from '../models/Setting';
 import { Telegram } from '../models/Telegram';
-import { setupBot } from '../helper/telegramBot';
+import { getBot } from '../helper/telegramBot';
 import { Video } from '../models/Video';
 
 export const index = async (req: Request, res: Response) => {
@@ -44,7 +44,7 @@ export const postTgSetting = async (req: Request, res: Response) => {
 
       setting = new Telegram(settingData);
       await setting.save();
-      setupBot();
+      await getBot();
     }
     res.redirect('/admin/telegram');
   } catch (error) {

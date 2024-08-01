@@ -7,34 +7,55 @@ import { User } from '../models/User';
 import bcrypt from 'bcrypt';
 import { TelegramMessage } from '../models/TelegramMessage';
 
+class BotSingleton {
+  private static instance: TelegramBot | null = null;
+  private static isInitializing = false;
+
+  private constructor() { }
+
+  static async getInstance(): Promise<TelegramBot | null> {
+    if (BotSingleton.instance) {
+      return BotSingleton.instance;
+    }
+
+    if (BotSingleton.isInitializing) {
+      // 如果正在初始化，等待一段时间后重试
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      return BotSingleton.getInstance();
+    }
+
+    BotSingleton.isInitializing = true;
+
+    try {
+      const setting = await getSetting();
+      if (!setting || !setting.TranscodingBotToken) {
+        console.error('Bot settings not found or invalid');
+        return null;
+      }
+
+      BotSingleton.instance = new TelegramBot(setting.TranscodingBotToken, {
+        polling: true,
+        baseApiUrl: process.env.LOCAL_TG_SERVER
+      });
+
+      console.log('Bot instance created successfully');
+      await setupBotHandlers(BotSingleton.instance, setting);
+
+      return BotSingleton.instance;
+    } catch (error) {
+      console.error('Error creating bot instance:', error);
+      return null;
+    } finally {
+      BotSingleton.isInitializing = false;
+    }
+  }
+}
 
 async function getSetting() {
-  const setting = await Telegram.findOne();
-  if (!setting) {
-    return;
-  }
-  return setting;
+  return await Telegram.findOne();
 }
 
-export async function createBot() {
-  const setting = await getSetting();
-  if (!setting) {
-    return;
-  }
-  const bot = new TelegramBot(setting.TranscodingBotToken!, { polling: true, baseApiUrl: process.env.LOCAL_TG_SERVER });
-  return bot;
-}
-
-export async function setupBot() {
-  const setting = await getSetting();
-  if (!setting) {
-    return;
-  }
-  const bot = await createBot();
-  if (!bot) {
-    console.error('Failed to create bot');
-    return;
-  }
+async function setupBotHandlers(bot: TelegramBot, setting: any) {
   bot.on('polling_error', (error) => {
     console.error('Polling error:', error.message);
   });
@@ -42,7 +63,7 @@ export async function setupBot() {
   bot.on('error', (error) => {
     console.error('General error:', error.message);
   });
-  // 处理视频转发消息
+
   bot.on('video', async (msg) => {
     const chatId = msg.chat.id;
     const message_id = msg.message_id;
@@ -150,41 +171,11 @@ export async function setupBot() {
         bot.sendMessage(chatId, "The video file is downloaded successfully. After transcoding is completed, the transcoded video, thumbnail, preview video, etc. will be returned to you.", {
           reply_to_message_id: callbackQuery.message ? callbackQuery.message.message_id : undefined
         });
-
-        // await bot.sendVideo(chatId, transcodedFilePath);
-
-
-        // await bot.sendVideo(chatId, transcodedFilePath, { caption: 'Preview Video' });
-        // await bot.sendPhoto(chatId, transcodedFilePath, { caption: 'Thumbnail' });
-
-
-        // fs.unlinkSync(localFilePath);
-        // fs.unlinkSync(transcodedFilePath);
       }
     });
   });
 }
 
-// async function downloadFile(filePath: string, localFilePath: string) {
-//   const setting = await getSetting();
-//   if (!setting) {
-//     return;
-//   }
-//   try {
-//     const url = `https://api.telegram.org/file/bot${setting!.TranscodingBotToken}/${filePath}`;
-//     const response = await fetch(url);
-
-//     if (!response.ok) {
-//       throw new Error(`Failed to download file: ${response.status} ${response.statusText}`);
-//     }
-
-//     const arrayBuffer = await response.arrayBuffer();
-//     const buffer = Buffer.from(arrayBuffer);
-
-//     fs.writeFileSync(localFilePath, buffer);
-//     console.log(`File downloaded and saved to ${localFilePath}`);
-//   } catch (error) {
-//     console.error(`Error downloading file: ${error}`);
-//   }
-// }
-
+export async function getBot(): Promise<TelegramBot | null> {
+  return BotSingleton.getInstance();
+}

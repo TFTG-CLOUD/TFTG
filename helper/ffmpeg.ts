@@ -6,7 +6,7 @@ import path from 'path';
 import fs from 'fs';
 import sharp from 'sharp';
 import { Telegram } from '../models/Telegram';
-import { createBot } from './telegramBot';
+import { getBot } from './telegramBot';
 import { TelegramMessage } from '../models/TelegramMessage';
 import type { InputMediaPhoto } from 'node-telegram-bot-api';
 
@@ -142,8 +142,9 @@ async function transcodeVideo(videoPath: string, options: Setting, id: string): 
         if (telegram) {
           const telegramMessage = await TelegramMessage.findOne({ videoId: id }).sort('-createdAt');
           if (telegramMessage) {
-            const bot = await createBot();
+            const bot = await getBot();
             if (!bot) {
+              console.error('Failed to get bot instance');
               return;
             }
             const video = await Video.findOne({ _id: id });

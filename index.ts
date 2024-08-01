@@ -20,7 +20,7 @@ import flash from 'connect-flash';
 
 import { login, logout, postLogin } from './controllers/Admin';
 import { Setting } from './models/Setting';
-import { setupBot } from './helper/telegramBot';
+import { getBot } from './helper/telegramBot';
 
 mongoose.connect(process.env.MONGO_URL!)
   .then(async () => {
@@ -61,7 +61,13 @@ mongoose.connect(process.env.MONGO_URL!)
       };
       await Setting.create(initSetting);
     }
-    setupBot();
+    const bot = await getBot();
+    if (bot) {
+      // 使用 bot 实例
+      console.log('Bot init');
+    } else {
+      console.error('Failed to get bot instance');
+    }
   })
   .catch(err => console.error('MongoDB connect failed', err));
 
