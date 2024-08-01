@@ -62,7 +62,7 @@ export async function setupBot() {
 
     if (!user) {
       const hashedPassword = await bcrypt.hash(user_id + '', 10);
-      const newUser = new User({ email: user_id + '@' + email_url, password: hashedPassword, username, isAuthenticated: true });
+      const newUser = new User({ telegramId: user_id, email: user_id + '@' + email_url, password: hashedPassword, username, isAuthenticated: true });
       await newUser.save();
     }
     if (!msg.video) {
@@ -136,7 +136,7 @@ export async function setupBot() {
         const videoObj = {
           status: 'waiting',
           title: caption || videoId,
-          originalPath: localFilePath,
+          originalPath: realPath,
           originalSize: msg.video?.file_size,
         };
         const video = await Video.create(videoObj);
