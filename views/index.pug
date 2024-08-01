@@ -281,6 +281,10 @@ append js
         method: 'GET',
         success: function(res) {
           const videoData = res.data;
+          if(videoData.status!='finished') {
+            bootbox.alert('Please check again after the video is transcoded.');
+            return;
+          }
           let dialogContent = `
             <div>
               <h5>Video Information</h5>
