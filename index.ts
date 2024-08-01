@@ -80,7 +80,7 @@ Bun.serve({
       return new Response(null, { status: 404 });
     }
   },
-  port: 3001,
+  port: 3334,
 });
 
 // 创建uploads目录，如果不存在则创建
