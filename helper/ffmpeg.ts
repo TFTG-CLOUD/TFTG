@@ -151,20 +151,24 @@ async function transcodeVideo(videoPath: string, options: Setting, id: string): 
             const video = await Video.findOne({ _id: id });
             let media: InputMedia[] = [{
               type: 'video',
-              media: outputFilePath
+              media: outputFilePath,
+              duration: video?.duration,
+              caption: 'Your video has been transcoded.'
             } as InputMediaVideo];
             // await bot.sendVideo(telegramMessage.chatId, outputFilePath, { caption: 'Your video has been transcoded.', reply_to_message_id: telegramMessage.messageId });
             if (video && video.previewVideo) {
               // await bot.sendVideo(telegramMessage.chatId, video.previewVideo, { caption: 'A preview of your video has been generated!', reply_to_message_id: telegramMessage.messageId });
               media.push({
                 type: 'video',
-                media: video.previewVideo
+                media: video.previewVideo,
+                caption: 'A preview of your video has been generated!'
               } as InputMediaVideo)
             }
             if (video && video.thumbnail) {
               media.push({
                 type: 'photo',
-                media: video.thumbnail
+                media: video.thumbnail,
+                caption: 'A thumbnail of your video has been generated!'
               } as InputMediaPhoto)
               // await bot.sendPhoto(telegramMessage.chatId, video.thumbnail, { caption: 'A thumbnail of your video has been generated!', reply_to_message_id: telegramMessage.messageId });
             }
@@ -385,6 +389,8 @@ async function createThumbnailMosaic(screenshotPaths: string[], rows: number, co
   if (screenshotPaths.length < 12) {
     return;
   }
+
+  const { dir, name, ext } = path.parse(outputThumbnail);
   const limitedPaths = screenshotPaths.slice(0, 12);
   const images = limitedPaths.map(path => sharp(path));
   const { width, height } = await images[0].metadata();
@@ -408,15 +414,6 @@ async function createThumbnailMosaic(screenshotPaths: string[], rows: number, co
   const totalWidth = width * cols;
   const totalHeight = height * rows;
 
-  let resizedWidth = totalWidth;
-  let resizedHeight = totalHeight;
-
-  if (totalWidth + totalHeight > 10000) {
-    const scaleFactor = 9000 / (totalWidth + totalHeight);
-    resizedWidth = Math.round(totalWidth * scaleFactor);
-    resizedHeight = Math.round(totalHeight * scaleFactor);
-  }
-
   await sharp({
     create: {
       width: width * cols,
@@ -425,8 +422,21 @@ async function createThumbnailMosaic(screenshotPaths: string[], rows: number, co
       background: { r: 0, g: 0, b: 0 }
     }
   })
-    .resize(resizedWidth, resizedHeight, { fit: 'inside' })
+    .composite(compositeImages)
     .toFile(outputThumbnail);
+
+  if (totalWidth + totalHeight > 10000) {
+    const scaleFactor = 9000 / (totalWidth + totalHeight);
+    const resizedWidth = Math.round(totalWidth * scaleFactor);
+
+    // 重命名原始文件
+    const originalThumbnail = path.join(dir, `${name}_original${ext}`);
+    fs.copyFileSync(outputThumbnail, originalThumbnail);
+
+    await sharp(originalThumbnail)
+      .resize(resizedWidth)
+      .toFile(outputThumbnail);
+  }
 }
 
 /**
