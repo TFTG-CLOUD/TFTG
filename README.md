@@ -9,6 +9,10 @@ TFTG is a cloud transcoding system dedicated to Telegram bot. It is used to auto
 ![BotSetting](public/images/botsetting.png "TFTG")
 ![FFmpegSetting](public/images/ffmpegsetting.png "TFTG")
 
+## Telegram Bot
+
+You can try out the bot in Telegram at the following link: https://t.me/cloud_video_transcoding_bot, but the server is rubbish, the speed is slow, and it can only process videos up to 150 seconds long (you can change this in the backend if you build it yourself).
+
 ## Installation
 
 ### Docker install Telegram Bot API
