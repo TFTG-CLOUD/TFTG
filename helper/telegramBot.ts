@@ -1,4 +1,4 @@
-import TelegramBot from 'node-telegram-bot-api';
+import TelegramBot, { type KeyboardButton, type ReplyKeyboardMarkup, type SendMessageOptions } from 'node-telegram-bot-api';
 import fs from 'fs';
 import path from 'path';
 import { Telegram } from '../models/Telegram';
@@ -56,6 +56,56 @@ async function getSetting() {
 }
 
 async function setupBotHandlers(bot: TelegramBot, setting: any) {
+
+  // 处理 /start 命令
+  bot.onText(/\/start/, async (msg) => {
+    const chatId = msg.chat.id;
+    const username = msg.from?.username;
+
+    // 创建欢迎消息
+    let welcomeMessage = `Welcome to our bot, ${username || 'dear user'}! 👋\n\n`;
+    welcomeMessage += "Here's what I can do for you:\n";
+    welcomeMessage += "• Handle video transcoding\n";
+    welcomeMessage += "• Provide information about our services\n";
+    welcomeMessage += "• And more!\n\n";
+    welcomeMessage += "Feel free to send me a video or use the commands below to get started.";
+
+
+    const replyMarkup: ReplyKeyboardMarkup = {
+      keyboard: [
+        [{ text: '📹 Send a video' }],
+        [{ text: 'ℹ️ About us' }, { text: '📞 Contact support' }]
+      ],
+      resize_keyboard: true,
+      one_time_keyboard: false
+    };
+
+    const options: SendMessageOptions = {
+      reply_markup: replyMarkup
+    };
+
+    // 发送欢迎消息和菜单
+    await bot.sendMessage(chatId, welcomeMessage, options);
+  });
+
+  bot.on('message', async (msg) => {
+    const chatId = msg.chat.id;
+    const text = msg.text;
+
+    switch (text) {
+      case '📹 Send a video':
+        await bot.sendMessage(chatId, "Great! Please send me the video you'd like to transcode.");
+        break;
+      case 'ℹ️ About us':
+        await bot.sendMessage(chatId, "We are a video transcoding service. We help you convert your videos to different formats and qualities.");
+        break;
+      case '📞 Contact support':
+        await bot.sendMessage(chatId, "If you need help, please contact our support team at tftg.cloud");
+        break;
+      // 可以添加更多自定义按钮的处理逻辑
+    }
+  });
+
   bot.on('polling_error', (error) => {
     console.error('Polling error:', error.message);
   });

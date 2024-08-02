@@ -8,7 +8,7 @@ import sharp from 'sharp';
 import { Telegram } from '../models/Telegram';
 import { getBot } from './telegramBot';
 import { TelegramMessage } from '../models/TelegramMessage';
-import type { InputMediaPhoto } from 'node-telegram-bot-api';
+import type { InputMedia, InputMediaPhoto, InputMediaVideo } from 'node-telegram-bot-api';
 
 ffmpeg.setFfmpegPath(ffmpegPath!);
 ffmpeg.setFfprobePath(ffprobePath!);
@@ -147,23 +147,37 @@ async function transcodeVideo(videoPath: string, options: Setting, id: string): 
               console.error('Failed to get bot instance');
               return;
             }
+
             const video = await Video.findOne({ _id: id });
-            bot.sendVideo(telegramMessage.chatId, outputFilePath, { caption: 'Your video has been transcoded.', reply_to_message_id: telegramMessage.messageId });
+            let media: InputMedia[] = [{
+              type: 'video',
+              media: outputFilePath
+            }];
+            // await bot.sendVideo(telegramMessage.chatId, outputFilePath, { caption: 'Your video has been transcoded.', reply_to_message_id: telegramMessage.messageId });
             if (video && video.previewVideo) {
-              bot.sendVideo(telegramMessage.chatId, video.previewVideo, { caption: 'A preview of your video has been generated!', reply_to_message_id: telegramMessage.messageId });
+              // await bot.sendVideo(telegramMessage.chatId, video.previewVideo, { caption: 'A preview of your video has been generated!', reply_to_message_id: telegramMessage.messageId });
+              media.push({
+                type: 'video',
+                media: video.previewVideo
+              })
             }
             if (video && video.thumbnail) {
-              bot.sendPhoto(telegramMessage.chatId, video.thumbnail, { caption: 'A thumbnail of your video has been generated!', reply_to_message_id: telegramMessage.messageId });
+              media.push({
+                type: 'photo',
+                media: video.thumbnail
+              })
+              // await bot.sendPhoto(telegramMessage.chatId, video.thumbnail, { caption: 'A thumbnail of your video has been generated!', reply_to_message_id: telegramMessage.messageId });
             }
-            if (video && video.screenshots) {
-              const media: InputMediaPhoto[] = video.screenshots.map(path => {
-                return {
-                  type: 'photo',
-                  media: fs.createReadStream(path) as any
-                };
-              });
-              bot.sendMediaGroup(telegramMessage.chatId, media, { reply_to_message_id: telegramMessage.messageId });
-            }
+            await bot.sendMediaGroup(telegramMessage.chatId, media, { reply_to_message_id: telegramMessage.messageId });
+            // if (video && video.screenshots) {
+            //   const media: InputMediaPhoto[] = video.screenshots.map(path => {
+            //     return {
+            //       type: 'photo',
+            //       media: fs.createReadStream(path) as any,
+            //     };
+            //   });
+            //   await bot.sendMediaGroup(telegramMessage.chatId, media, { reply_to_message_id: telegramMessage.messageId });
+            // }
           }
         }
         resolve('Transcoding succeeded!');
