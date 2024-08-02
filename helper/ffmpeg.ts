@@ -411,14 +411,10 @@ async function createThumbnailMosaic(screenshotPaths: string[], rows: number, co
   let resizedWidth = totalWidth;
   let resizedHeight = totalHeight;
 
-  if (totalWidth > 10000 || totalHeight > 10000) {
-    if (totalWidth > totalHeight) {
-      resizedWidth = 9000;
-      resizedHeight = Math.round((9000 / totalWidth) * totalHeight);
-    } else {
-      resizedHeight = 9000;
-      resizedWidth = Math.round((9000 / totalHeight) * totalWidth);
-    }
+  if (totalWidth + totalHeight > 10000) {
+    const scaleFactor = 9000 / (totalWidth + totalHeight);
+    resizedWidth = Math.round(totalWidth * scaleFactor);
+    resizedHeight = Math.round(totalHeight * scaleFactor);
   }
 
   await sharp({
@@ -429,8 +425,7 @@ async function createThumbnailMosaic(screenshotPaths: string[], rows: number, co
       background: { r: 0, g: 0, b: 0 }
     }
   })
-    .composite(compositeImages)
-    .resize(resizedWidth, resizedHeight)
+    .resize(resizedWidth, resizedHeight, { fit: 'inside' })
     .toFile(outputThumbnail);
 }
 
