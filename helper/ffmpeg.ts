@@ -152,20 +152,20 @@ async function transcodeVideo(videoPath: string, options: Setting, id: string): 
             let media: InputMedia[] = [{
               type: 'video',
               media: outputFilePath
-            }];
+            } as InputMediaVideo];
             // await bot.sendVideo(telegramMessage.chatId, outputFilePath, { caption: 'Your video has been transcoded.', reply_to_message_id: telegramMessage.messageId });
             if (video && video.previewVideo) {
               // await bot.sendVideo(telegramMessage.chatId, video.previewVideo, { caption: 'A preview of your video has been generated!', reply_to_message_id: telegramMessage.messageId });
               media.push({
                 type: 'video',
                 media: video.previewVideo
-              })
+              } as InputMediaVideo)
             }
             if (video && video.thumbnail) {
               media.push({
                 type: 'photo',
                 media: video.thumbnail
-              })
+              } as InputMediaPhoto)
               // await bot.sendPhoto(telegramMessage.chatId, video.thumbnail, { caption: 'A thumbnail of your video has been generated!', reply_to_message_id: telegramMessage.messageId });
             }
             await bot.sendMediaGroup(telegramMessage.chatId, media, { reply_to_message_id: telegramMessage.messageId });
@@ -405,6 +405,22 @@ async function createThumbnailMosaic(screenshotPaths: string[], rows: number, co
     });
   }
 
+  const totalWidth = width * cols;
+  const totalHeight = height * rows;
+
+  let resizedWidth = totalWidth;
+  let resizedHeight = totalHeight;
+
+  if (totalWidth > 10000 || totalHeight > 10000) {
+    if (totalWidth > totalHeight) {
+      resizedWidth = 9000;
+      resizedHeight = Math.round((9000 / totalWidth) * totalHeight);
+    } else {
+      resizedHeight = 9000;
+      resizedWidth = Math.round((9000 / totalHeight) * totalWidth);
+    }
+  }
+
   await sharp({
     create: {
       width: width * cols,
@@ -414,6 +430,7 @@ async function createThumbnailMosaic(screenshotPaths: string[], rows: number, co
     }
   })
     .composite(compositeImages)
+    .resize(resizedWidth, resizedHeight)
     .toFile(outputThumbnail);
 }
 
