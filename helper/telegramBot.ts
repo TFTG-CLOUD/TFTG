@@ -174,7 +174,7 @@ async function setupBotHandlers(bot: TelegramBot, setting: any) {
         }, {
           chat_id: chatId,
           message_id: message.message_id
-        });
+        }).catch((err) => console.error(err));
       }
       if (action === 'download_and_transcode') {
         if (callbackQuery.message) {
