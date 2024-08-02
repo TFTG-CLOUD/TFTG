@@ -152,7 +152,7 @@ async function transcodeVideo(videoPath: string, options: Setting, id: string): 
             let media: InputMedia[] = [{
               type: 'video',
               media: outputFilePath,
-              duration: video?.duration,
+              duration: Math.round(video!.duration!),
               caption: 'Your video has been transcoded.'
             } as InputMediaVideo];
             // await bot.sendVideo(telegramMessage.chatId, outputFilePath, { caption: 'Your video has been transcoded.', reply_to_message_id: telegramMessage.messageId });
