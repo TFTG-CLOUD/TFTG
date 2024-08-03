@@ -331,10 +331,6 @@ append js
       let data = row.data();
       console.log(data);
 
-      if(data.status == 'transcoding') {
-        bootbox.alert('The video is transcoding, please try again later.');
-        return;
-      }
 
       // 获取当前行的 id
       let videoId = data._id;
