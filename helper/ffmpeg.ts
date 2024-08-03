@@ -353,26 +353,40 @@ async function getVideoDuration(videoPath: string): Promise<number> {
  * @returns {Promise<string[]>} A promise that resolves with an array of paths to the generated screenshots.
  */
 async function generateScreenshots(videoPath: string, screenshotCount: number, duration: number, outputDir: string): Promise<string[]> {
-  const interval = duration / screenshotCount;
-  const screenshotPaths: string[] = [];
+  // 确保至少生成一个截图
+  screenshotCount = Math.max(1, screenshotCount);
+
+  // 计算实际间隔，确保不会超出视频时长
+  const interval = duration / (screenshotCount - 1);
+
+  const screenshotPromises: Promise<string>[] = [];
 
   for (let i = 0; i < screenshotCount; i++) {
-    const ss = (i * interval).toFixed(2);
+    // 使用 Math.min 确保时间点不会超出视频时长
+    const ss = Math.min(i * interval, duration).toFixed(2);
     const screenshotPath = path.join(outputDir, `${i}.jpg`);
-    screenshotPaths.push(screenshotPath);
 
-    await new Promise<void>((resolve, reject) => {
+    const screenshotPromise = new Promise<string>((resolve, reject) => {
       ffmpeg(videoPath)
         .addInputOption('-ss', ss)
         .addOptions(['-vframes:v 1'])
         .output(screenshotPath)
-        .on('end', () => resolve())
-        .on('error', (err) => reject(`Error generating screenshot: ${err.message}`))
+        .on('end', () => resolve(screenshotPath))
+        .on('error', (err) => reject(`Error generating screenshot ${i}: ${err.message}`))
         .run();
     });
+
+    screenshotPromises.push(screenshotPromise);
   }
 
-  return screenshotPaths;
+  try {
+    // 并行处理所有截图
+    const screenshotPaths = await Promise.all(screenshotPromises);
+    return screenshotPaths;
+  } catch (error) {
+    console.error('Error generating screenshots:', error);
+    throw error;
+  }
 }
 
 /**
