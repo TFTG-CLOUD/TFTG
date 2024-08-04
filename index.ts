@@ -160,7 +160,7 @@ app.post('/login', postLogin);
 app.get('/logout', logout);
 app.use('/users', userRouter);
 app.use('/admin', checkNotLogin, adminRouter);
-app.use('/videos', videoRouter);
+app.use('/api/videos', videoRouter);
 app.get("/ping", (_, res) => {
   res.send("🏓 pong 111!");
 });

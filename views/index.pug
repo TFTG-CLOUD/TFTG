@@ -155,7 +155,7 @@ append js
     });
     let table = new DataTable('#tftg-table', {
       select: true,
-      ajax: "/videos",
+      ajax: "/api/videos",
       serverSide: true,
       fixedColumns: {
         start: 0,
@@ -252,7 +252,7 @@ append js
       let currentTitle = data.title;
       let videoId = data._id; // Assuming the video ID is available in the data object
       $.ajax({
-        url: `/videos/transcode`,
+        url: `/api/videos/transcode`,
         type: 'POST',
         data: { id: videoId },
         success: function (response) {
@@ -281,7 +281,7 @@ append js
           if (result !== null) {
             // Send PATCH request to update the title
             $.ajax({
-              url: `/videos`,
+              url: `/api/videos`,
               type: 'PATCH',
               data: { title: result, id: videoId },
               success: function (response) {
@@ -301,7 +301,7 @@ append js
       let videoId = data._id;
 
       $.ajax({
-        url: `/videos/${videoId}`,
+        url: `/api/videos/${videoId}`,
         method: 'GET',
         success: function(res) {
           const videoData = res.data;
@@ -364,7 +364,7 @@ append js
           if(result) {
             console.log(videoId);
             $.ajax({
-              url: `/videos?id=${videoId}`,
+              url: `/api/videos?id=${videoId}`,
               type: 'DELETE',
               success: function (result) {
                 // 删除成功后，移除当前行
