@@ -161,10 +161,13 @@ async function setupBotHandlers(bot: TelegramBot, setting: any) {
         inline_keyboard: [
           [
             { text: 'Download and Transcode', callback_data: 'download_and_transcode' },
+          ], [
             {
               text: 'Download and generate public link', callback_data: 'download_and_generate_link'
-            },
+            }
+          ], [
             { text: 'Generate preview video', callback_data: 'generate_preview_video' },
+          ], [
             { text: 'Generate 4x3 thumbnail', callback_data: 'generate_4x3_thumbnail' }
           ]
         ]
