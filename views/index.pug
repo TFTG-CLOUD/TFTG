@@ -234,14 +234,38 @@ append js
         {
           "data": null,
           orderable: false,
-          "defaultContent": `
-            <div class="btn-group btn-group-sm" role="group" aria-label="Actions">
-              <button type="button" class="btn btn-primary btn-view">View</button>
-              <button type="button" class="btn btn-primary btn-edit">Edit</button>
-              <button type="button" class="btn btn-danger btn-delete">Delete</button>
-            </div>`
-              }
+          render: function (data, type, row) {
+            return `
+              <div class="btn-group btn-group-sm" role="group" aria-label="Actions">
+                ${row.notTranscoding == true ? `<button type="button" class="btn btn-primary btn-convert">Convert</button>` : ''}
+                <button type="button" class="btn btn-primary btn-view">View</button>
+                <button type="button" class="btn btn-primary btn-edit">Edit</button>
+                <button type="button" class="btn btn-danger btn-delete">Delete</button>
+              </div>`;
+          }
+        }
       ]
+    });
+
+    $('#tftg-table tbody').on('click', '.btn-convert', function () {
+      let data = table.row($(this).closest('tr')).data();
+      let currentTitle = data.title;
+      let videoId = data._id; // Assuming the video ID is available in the data object
+      $.ajax({
+        url: `/videos/transcode`,
+        type: 'POST',
+        data: { id: videoId },
+        success: function (response) {
+          // Refresh the table or update the specific row
+          // Reload the table without resetting the pagination
+          if(response.success) {
+            bootbox.alert('Joined the transcoding queue, please wait.');
+          }
+        },
+        error: function (xhr, status, error) { console.error("Error updating trancode status:", error); 
+        } 
+      }); 
+
     });
 
     // Add event listener for the Edit button

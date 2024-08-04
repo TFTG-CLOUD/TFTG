@@ -14,6 +14,7 @@ const VideoSchema = new Schema({
     height: { type: Number }
   },
   duration: { type: Number },
+  notTranscoding: { type: Boolean, default: false },
   originalPath: { type: String, required: true },
   afterPath: String,
   transcodedPath: String, // path to the transcoded folder
@@ -30,7 +31,7 @@ const VideoSchema = new Schema({
 });
 
 VideoSchema.index({ title: 1 });
-VideoSchema.index({ status: 1 });
+VideoSchema.index({ status: 1, notTranscoding: 1 });
 VideoSchema.index({ duration: 1 });
 VideoSchema.index({ createdAt: -1 });
 

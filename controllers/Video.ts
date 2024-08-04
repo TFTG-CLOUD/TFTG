@@ -29,7 +29,7 @@ export const getMore = async (req: Request, res: Response) => {
     .skip(startValue)
     .limit(lengthValue)
     .sort(sort)
-    .select('_id title status originalSize afterSize duration poster previewVideo createdAt');
+    .select('_id title status originalSize afterSize duration poster previewVideo createdAt notTranscoding');
 
   res.json({ draw, data: videos, recordsTotal: counts, recordsFiltered: filterCounts });
 }
@@ -63,5 +63,11 @@ export const updateOne = async (req: Request, res: Response) => {
   const title = req.body.title;
   const id = req.body.id;
   await Video.updateOne({ _id: id }, { title })
+  res.json({ success: 1 });
+}
+
+export const transcode = async (req: Request, res: Response) => {
+  const id = req.body.id;
+  await Video.updateOne({ _id: id }, { notTranscoding: false });
   res.json({ success: 1 });
 }

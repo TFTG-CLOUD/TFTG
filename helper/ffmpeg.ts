@@ -20,7 +20,7 @@ ffmpeg.setFfprobePath(ffprobePath!);
  * If an error occurs during transcoding, the video status is updated to 'error'.
  */
 export const transcoding = async function () {
-  const video = await Video.findOne({ status: 'waiting' });
+  const video = await Video.findOne({ status: 'waiting', notTranscoding: false });
   const setting = await Setting.findOne();
   if (!video) return;
   if (!setting) return;
@@ -306,7 +306,7 @@ async function screenshots(videoPath: string, outputDir: string, setting: Settin
     // const duration = await getVideoDuration(videoPath);
     const screenshotPaths = await generateScreenshots(videoPath, screenshotCount, outputDir);
 
-    const rows = Math.ceil(screenshotCount / 4);
+    // const rows = Math.ceil(screenshotCount / 4);
     const outputPoster = path.join(outputDir, 'poster.jpg');
     let videoObj = { screenshots: screenshotPaths, poster: outputPoster } as {
       screenshots: string[];
@@ -316,7 +316,7 @@ async function screenshots(videoPath: string, outputDir: string, setting: Settin
     if (setting.generateThumbnailMosaic) {
       const outputThumbnail = path.join(outputDir, 'thumbnail.jpg');
       if (screenshotPaths.length >= 12) {
-        await createThumbnailMosaic(screenshotPaths, rows, 4, outputThumbnail);
+        await createThumbnailMosaic(screenshotPaths, 3, 4, outputThumbnail);
         videoObj.thumbnail = outputThumbnail;
       }
     }
@@ -533,6 +533,50 @@ function generateVideoPreview(id: string, inputPath: string, outputDir: string, 
         .catch(reject);
     });
   });
+}
+
+export const generatePreviewVideoForBot = async function (id: string) {
+  const video = await Video.findOne({ _id: id });
+  const setting = await Setting.findOne({});
+  if (!video) {
+    return;
+  }
+  const filePath = video.originalPath;
+  const validVideo = await validateVideoFile(filePath)
+  if (!validVideo) {
+    return;
+  }
+  const outputDir = path.join('public', 'videos', video._id.toString());
+  if (!fs.existsSync(outputDir)) {
+    fs.mkdirSync(outputDir, { recursive: true });
+  }
+  const previewVideo = await generateVideoPreview(video._id.toString(), filePath, outputDir, setting!.previewVideoSize!.width!, setting!.previewVideoSize!.height!);
+  return previewVideo;
+}
+
+export const generateThumbnailMosaicForBot = async function (id: string) {
+  const video = await Video.findOne({ _id: id });
+  if (!video) {
+    return;
+  }
+  const filePath = video.originalPath;
+  const validVideo = await validateVideoFile(filePath)
+  if (!validVideo) {
+    return;
+  }
+  const outputDir = path.join('public', 'videos', video._id.toString());
+  if (!fs.existsSync(outputDir)) {
+    fs.mkdirSync(outputDir, { recursive: true });
+  }
+  const screenshotCount = 12;
+
+  const screenshotPaths = await generateScreenshots(filePath, screenshotCount, outputDir);
+
+  const outputThumbnail = path.join(outputDir, 'thumbnail.jpg');
+  if (screenshotPaths.length >= 12) {
+    await createThumbnailMosaic(screenshotPaths, 3, 4, outputThumbnail);
+  }
+  return outputThumbnail;
 }
 
 function generateSegment(inputPath: string, outputPath: string, startTime: number, duration: number, width: number, height: number): Promise<string> {

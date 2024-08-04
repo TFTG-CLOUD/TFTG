@@ -6,6 +6,7 @@ import { Video } from '../models/Video';
 import { User } from '../models/User';
 import bcrypt from 'bcrypt';
 import { TelegramMessage } from '../models/TelegramMessage';
+import { generatePreviewVideoForBot, generateThumbnailMosaicForBot } from './ffmpeg';
 
 class BotSingleton {
   private static instance: TelegramBot | null = null;
@@ -158,7 +159,14 @@ async function setupBotHandlers(bot: TelegramBot, setting: any) {
     bot.sendMessage(chatId, 'Video received. What would you like to do?', {
       reply_markup: {
         inline_keyboard: [
-          [{ text: 'Download and Transcode', callback_data: 'download_and_transcode' }]
+          [
+            { text: 'Download and Transcode', callback_data: 'download_and_transcode' },
+            {
+              text: 'Download and generate public link', callback_data: 'download_and_generate_link'
+            },
+            { text: 'Generate preview video', callback_data: 'generate_preview_video' },
+            { text: 'Generate 4x3 thumbnail', callback_data: 'generate_4x3_thumbnail' }
+          ]
         ]
       },
       reply_to_message_id: message_id
@@ -176,9 +184,109 @@ async function setupBotHandlers(bot: TelegramBot, setting: any) {
           message_id: message.message_id
         }).catch((err) => console.error(err));
       }
+      if (action === 'download_and_generate_link') {
+        if (callbackQuery.message) {
+          await bot.sendMessage(chatId, 'Downloading and generating public link, please wating...', {
+            reply_to_message_id: callbackQuery.message ? callbackQuery.message.message_id : undefined
+          });
+        }
+        const file = await bot.getFile(videoId);
+        const filePath = file.file_path;
+        if (!filePath) {
+          bot.sendMessage(chatId, "Can't get file url, please retry...", {
+            reply_to_message_id: callbackQuery.message ? callbackQuery.message.message_id : undefined
+          });
+          return;
+        }
+        console.log(filePath);
+        const publicLink = path.join('public', 'videos', videoId + path.extname(filePath));
+        fs.renameSync(filePath, path.join('public', 'videos', videoId + path.extname(filePath)));
+        const videoObj = {
+          status: 'waiting',
+          title: caption || videoId,
+          originalPath: publicLink,
+          notTranscoding: true,
+          originalSize: msg.video?.file_size,
+        };
+        await Video.create(videoObj);
+
+        bot.sendMessage(chatId, publicLink.replace('public', '') + `\n\nThis link will be valid for 24 hours.`, {
+          reply_to_message_id: callbackQuery.message ? callbackQuery.message.message_id : undefined
+        });
+      }
+      if (action === 'generate_preview_video') {
+        if (callbackQuery.message) {
+          await bot.sendMessage(chatId, 'Downloading and generating preview video, please wating...', {
+            reply_to_message_id: callbackQuery.message ? callbackQuery.message.message_id : undefined
+          });
+        }
+        const file = await bot.getFile(videoId);
+        const filePath = file.file_path;
+        if (!filePath) {
+          bot.sendMessage(chatId, "Can't get file url, please retry...", {
+            reply_to_message_id: callbackQuery.message ? callbackQuery.message.message_id : undefined
+          });
+          return;
+        }
+        console.log(filePath);
+        const videoObj = {
+          status: 'waiting',
+          title: caption || videoId,
+          originalPath: filePath,
+          notTranscoding: true,
+          originalSize: msg.video?.file_size,
+        };
+        const video = await Video.create(videoObj);
+        const previewVideoPath = await generatePreviewVideoForBot(video._id.toString());
+        if (previewVideoPath) {
+          bot.sendVideo(chatId, previewVideoPath, {
+            reply_to_message_id: callbackQuery.message ? callbackQuery.message.message_id : undefined,
+            caption: 'Preview video generated successfully!'
+          });
+        } else {
+          bot.sendMessage(chatId, "Can't generate preview video, please retry...", {
+            reply_to_message_id: callbackQuery.message ? callbackQuery.message.message_id : undefined
+          });
+        }
+      }
+      if (action == 'generate_4x3_thumbnail') {
+        if (callbackQuery.message) {
+          await bot.sendMessage(chatId, 'Downloading and generating 4x3 thumbnail, please wating...', {
+            reply_to_message_id: callbackQuery.message ? callbackQuery.message.message_id : undefined
+          });
+        }
+        const file = await bot.getFile(videoId);
+        const filePath = file.file_path;
+        if (!filePath) {
+          bot.sendMessage(chatId, "Can't get file url, please retry...", {
+            reply_to_message_id: callbackQuery.message ? callbackQuery.message.message_id : undefined
+          });
+          return;
+        }
+        console.log(filePath);
+        const videoObj = {
+          status: 'waiting',
+          title: caption || videoId,
+          originalPath: filePath,
+          notTranscoding: true,
+          originalSize: msg.video?.file_size,
+        };
+        const video = await Video.create(videoObj);
+        const thumbnailPath = await generateThumbnailMosaicForBot(video._id.toString());
+        if (thumbnailPath) {
+          bot.sendPhoto(chatId, thumbnailPath, {
+            reply_to_message_id: callbackQuery.message ? callbackQuery.message.message_id : undefined,
+            caption: '4x3 thumbnail generated successfully!'
+          });
+        } else {
+          bot.sendMessage(chatId, "Can't generate 4x3 thumbnail, please retry...", {
+            reply_to_message_id: callbackQuery.message ? callbackQuery.message.message_id : undefined
+          });
+        }
+      }
       if (action === 'download_and_transcode') {
         if (callbackQuery.message) {
-          bot.sendMessage(chatId, 'Downloading and transcoding video...', {
+          await bot.sendMessage(chatId, 'Downloading and transcoding video, please wating...', {
             reply_to_message_id: callbackQuery.message ? callbackQuery.message.message_id : undefined
           });
         }
