@@ -300,8 +300,8 @@ async function screenshots(videoPath: string, outputDir: string, setting: Settin
 
     const screenshotCount = setting.screenshotCount!;
 
-    const duration = await getVideoDuration(videoPath);
-    const screenshotPaths = await generateScreenshots(videoPath, screenshotCount, duration, outputDir);
+    // const duration = await getVideoDuration(videoPath);
+    const screenshotPaths = await generateScreenshots(videoPath, screenshotCount, outputDir);
 
     const rows = Math.ceil(screenshotCount / 4);
     const outputPoster = path.join(outputDir, 'poster.jpg');
@@ -352,24 +352,28 @@ async function getVideoDuration(videoPath: string): Promise<number> {
  * @param {string} outputDir - The directory to save the screenshots.
  * @returns {Promise<string[]>} A promise that resolves with an array of paths to the generated screenshots.
  */
-async function generateScreenshots(videoPath: string, screenshotCount: number, duration: number, outputDir: string): Promise<string[]> {
+async function generateScreenshots(videoPath: string, screenshotCount: number, outputDir: string): Promise<string[]> {
+  const videoInfo = await getVideoFrames(videoPath);
+  const totalFrames = parseInt(videoInfo.frames);
+
   // 确保至少生成一个截图
-  screenshotCount = Math.max(1, screenshotCount);
+  screenshotCount = Math.max(1, Math.min(screenshotCount, totalFrames));
 
-  // 计算实际间隔，确保不会超出视频时长
-  const interval = duration / (screenshotCount - 1);
+  // 计算帧间隔
+  const frameInterval = Math.max(1, Math.floor(totalFrames / screenshotCount));
 
-  const screenshotPromises: Promise<string>[] = [];
+  const screenshotPromises = [];
 
   for (let i = 0; i < screenshotCount; i++) {
-    // 使用 Math.min 确保时间点不会超出视频时长
-    const ss = Math.min(i * interval, duration).toFixed(2);
+    const frameNumber = Math.min(i * frameInterval, totalFrames - 1);
     const screenshotPath = path.join(outputDir, `${i}.jpg`);
 
     const screenshotPromise = new Promise<string>((resolve, reject) => {
       ffmpeg(videoPath)
-        .addInputOption('-ss', ss)
-        .addOptions(['-vframes:v 1'])
+        .seekInput(frameNumber / videoInfo.fps)
+        .outputOptions([
+          '-vframes:v', '1'
+        ])
         .output(screenshotPath)
         .on('end', () => resolve(screenshotPath))
         .on('error', (err) => reject(`Error generating screenshot ${i}: ${err.message}`))
@@ -387,6 +391,33 @@ async function generateScreenshots(videoPath: string, screenshotCount: number, d
     console.error('Error generating screenshots:', error);
     throw error;
   }
+}
+
+function getVideoFrames(videoPath: string): Promise<{ frames: string, fps: number }> {
+  return new Promise((resolve, reject) => {
+    ffmpeg.ffprobe(videoPath, (err, metadata) => {
+      if (err) {
+        reject(err);
+      } else {
+        const videoStream = metadata.streams.find(stream => stream.codec_type === 'video');
+        if (videoStream) {
+          const duration = parseFloat(videoStream.duration!);
+          const [frameRateNum, frameRateDen] = videoStream.r_frame_rate!.split('/');
+          const frameRate = parseInt(frameRateNum) / parseInt(frameRateDen);
+          if (videoStream.nb_frames) {
+            resolve({ frames: videoStream.nb_frames, fps: parseInt(frameRateNum) });
+          } else if (videoStream.duration && videoStream.r_frame_rate) {
+            const estimatedFrames = Math.floor(duration * frameRate);
+            resolve({ frames: estimatedFrames.toString(), fps: parseInt(frameRateNum) });
+          } else {
+            reject(new Error('Could not determine video frame count or duration'));
+          }
+        } else {
+          reject(new Error('No video stream found'));
+        }
+      }
+    });
+  });
 }
 
 /**
