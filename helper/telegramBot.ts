@@ -210,7 +210,7 @@ async function setupBotHandlers(bot: TelegramBot, setting: any) {
         };
         await Video.create(videoObj);
 
-        bot.sendMessage(chatId, publicLink.replace('public', '') + `\n\nThis link will be valid for 24 hours.`, {
+        bot.sendMessage(chatId, process.env.HOST + publicLink.replace('public', '') + `\n\nThis link will be valid for 24 hours.`, {
           reply_to_message_id: callbackQuery.message ? callbackQuery.message.message_id : undefined
         });
       }
