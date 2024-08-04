@@ -160,15 +160,15 @@ async function setupBotHandlers(bot: TelegramBot, setting: any) {
       reply_markup: {
         inline_keyboard: [
           [
-            { text: 'Download and Transcode', callback_data: 'download_and_transcode' },
+            { text: 'Download and Transcode', callback_data: `download_and_transcode$${message_id}` },
           ], [
             {
-              text: 'Download and generate public link', callback_data: 'download_and_generate_link'
+              text: 'Download and generate public link', callback_data: `download_and_generate_link$${message_id}`
             }
           ], [
-            { text: 'Generate preview video', callback_data: 'generate_preview_video' },
+            { text: 'Generate preview video', callback_data: `generate_preview_video$${message_id}` },
           ], [
-            { text: 'Generate 4x3 thumbnail', callback_data: 'generate_4x3_thumbnail' }
+            { text: 'Generate 4x3 thumbnail', callback_data: `generate_4x3_thumbnail$${message_id}` }
           ]
         ]
       },
@@ -177,8 +177,13 @@ async function setupBotHandlers(bot: TelegramBot, setting: any) {
 
     // 处理菜单选项回调
     bot.on('callback_query', async (callbackQuery) => {
-      const action = callbackQuery.data;
+      const data = callbackQuery.data;
       const message = callbackQuery.message;
+      if (!data) {
+        return;
+      }
+      const [action, videoMessageId] = data!.split('$');
+
       if (message) {
         await bot.editMessageReplyMarkup({
           inline_keyboard: []
