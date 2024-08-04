@@ -192,7 +192,8 @@ async function setupBotHandlers(bot: TelegramBot, setting: any) {
           message_id: message.message_id
         }).catch((err) => console.error(err));
       }
-      if (action === 'download_and_generate_link') {
+
+      if (action === 'download_and_generate_link' && parseInt(videoMessageId) == message_id) {
         if (callbackQuery.message) {
           await bot.sendMessage(chatId, 'Downloading and generating public link, please wating...', {
             reply_to_message_id: callbackQuery.message ? callbackQuery.message.message_id : undefined
@@ -222,7 +223,7 @@ async function setupBotHandlers(bot: TelegramBot, setting: any) {
           reply_to_message_id: callbackQuery.message ? callbackQuery.message.message_id : undefined
         });
       }
-      if (action === 'generate_preview_video') {
+      if (action === 'generate_preview_video' && parseInt(videoMessageId) == message_id) {
         if (callbackQuery.message) {
           await bot.sendMessage(chatId, 'Downloading and generating preview video, please wating...', {
             reply_to_message_id: callbackQuery.message ? callbackQuery.message.message_id : undefined
@@ -257,7 +258,7 @@ async function setupBotHandlers(bot: TelegramBot, setting: any) {
           });
         }
       }
-      if (action == 'generate_4x3_thumbnail') {
+      if (action == 'generate_4x3_thumbnail' && parseInt(videoMessageId) == message_id) {
         if (callbackQuery.message) {
           await bot.sendMessage(chatId, 'Downloading and generating 4x3 thumbnail, please wating...', {
             reply_to_message_id: callbackQuery.message ? callbackQuery.message.message_id : undefined
@@ -292,7 +293,7 @@ async function setupBotHandlers(bot: TelegramBot, setting: any) {
           });
         }
       }
-      if (action === 'download_and_transcode') {
+      if (action === 'download_and_transcode' && parseInt(videoMessageId) == message_id) {
         if (callbackQuery.message) {
           await bot.sendMessage(chatId, 'Downloading and transcoding video, please wating...', {
             reply_to_message_id: callbackQuery.message ? callbackQuery.message.message_id : undefined
