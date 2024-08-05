@@ -2,7 +2,7 @@ const { Server } = require('@tus/server')
 const { FileStore } = require('@tus/file-store')
 const jwt = require('jsonwebtoken')
 require('dotenv').config();
-const host = '127.0.0.1'
+const host = '0.0.0.0'
 const port = 1088
 
 const server = new Server({
