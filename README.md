@@ -1,5 +1,6 @@
 # TFTG
 
+Telegram bot for video processing: cloud-based video transcoding, public link generation, preview video creation, and 4x3 thumbnail generation.
 Perfect cloud transcoding system for transcode videos by Telegram bot + FFmpeg
 TFTG is a cloud transcoding system dedicated to Telegram bot. It is used to automatically download videos from Telegram bot, transcode them, add watermarks and marquees, gif image watermarks, etc., and generate preview videos, preview images, screenshots, etc.
 
@@ -17,7 +18,7 @@ You can try out the bot in Telegram at the following link: https://t.me/cloud_vi
 
 ### Docker install Telegram Bot API
 
-Before start, you will need to obtain api-id and api-hash as described in https://core.telegram.org/api/obtaining_api_id⁠ and specify them using the TELEGRAM_API_ID and TELEGRAM_API_HASH environment variables.
+Before start, you will need to obtain api-id and api-hash as described in [https://core.telegram.org/api/obtaining_api_id](https://core.telegram.org/api/obtaining_api_id)⁠ and specify them using the TELEGRAM_API_ID and TELEGRAM_API_HASH environment variables.
 
 ```
 docker run -d -p 8082:8081 --name=telegram-bot-api --restart=always -v /var/lib/telegram-bot-api:/var/lib/telegram-bot-api -e TELEGRAM_API_ID=TELEGRAM_API_ID -e TELEGRAM_API_HASH=TELEGRAM_API_HASH -e TELEGRAM_LOCAL=true aiogram/telegram-bot-api:latest
@@ -25,7 +26,70 @@ docker run -d -p 8082:8081 --name=telegram-bot-api --restart=always -v /var/lib/
 
 ### Install bunjs and mongodb and redis-server
 
-Docker is in the works, here is a manual installation tutorial.
+##### docker install
+
+**Initialization Configuration**
+
+```
+docker run -d --restart=unless-stopped \
+  -e EMAIL_URL="your_email_url" \
+  -e INITEMAIL="your_admin_email" \
+  -e INITPASSWORD="your_admin_password" \
+  -v /root/data:/data/logs \
+  -p 3333:3333 \
+  -p 1088:1088 \
+  --name tftgbot \
+  tftgbot/tftgbot
+```
+
+**If you have a new database, your own MongoDB database**
+
+```
+docker run -d --restart=unless-stopped \
+  -e MONGO_URL="mongodb://tftg:tftg@localhost:27017/tftg" \
+  -e EMAIL_URL="your_email_url" \
+  -e INITEMAIL="your_admin_email" \
+  -e INITPASSWORD="your_admin_password" \
+  -v /root/data:/data/logs \
+  -p 3333:3333 \
+  -p 1088:1088 \
+  --name tftgbot \
+  tftgbot/tftgbot
+```
+
+**If you have a domain name**
+
+```
+docker run -d --restart=unless-stopped \
+  -e MONGO_URL="mongodb://tftg:tftg@localhost:27017/tftg" \
+  -e HOST="http://domain.com" \
+  -e TUS_HOST="http://domain.com" \
+  -e LOCAL_TG_SERVER="http://domain.com" \
+  -e EMAIL_URL="your_email_url" \
+  -e INITEMAIL="your_admin_email" \
+  -e INITPASSWORD="your_admin_password" \
+  -v /root/data:/data/logs \
+  -p 3333:3333 \
+  -p 1088:1088 \
+  --name tftgbot \
+  tftgbot/tftgbot
+```
+
+`-e MONGO_URL="mongodb://tftg:tftg@localhost:27017/tftg"`: Sets the environment variable `MONGO_URL` to specify the MongoDB connection string.
+`-e HOST="http://domain.com"`: Sets the environment variable `HOST` to the base URL of the application.
+`-e TUS_HOST="http://domain.com"`: Sets the environment variable `TUS_HOST` to the base URL for TUS (Upload Service) functionality.
+`-e LOCAL_TG_SERVER="http://domain.com"`: Sets the environment variable `LOCAL_TG_SERVER` to the local Telegram server URL.
+`-e EMAIL_URL="your_email_url"`: Sets the environment variable `EMAIL_URL` to the URL for email services.
+`-e INITEMAIL="your_admin_email"`: Sets the environment variable `INITEMAIL` to the initial admin email address.
+`-e INITPASSWORD="your_admin_password"`: Sets the environment variable `INITPASSWORD` to the initial admin password.
+`-v /root/data:/data/logs`: Mounts the host directory `/root/data` to the container directory `/data/logs` for logging purposes.
+`-p 3333:3333`: Maps port `3333` on the host to port `3333` on the container.
+`-p 1088:1088`: Maps port `1088` on the host to port `1088` on the container.
+`--name tftgbot`: Names the container `tftgbot`.
+`tftgbot/tftgbot`: Specifies the Docker image to use for the container.
+
+##### Manual install
+
 Here we assume that you are using Ubuntu 22.04 system.
 
 #### Install Mongodb And Setup
